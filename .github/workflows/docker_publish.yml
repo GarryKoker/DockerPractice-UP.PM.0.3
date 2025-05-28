@@ -1,16 +1,13 @@
-name: Docker Image CI
+name: Build and Push Docker Image on PR Close
 
 on:
-  push:
-    branches:
-      - main # or your default branch
-  pull_request:
-    branches:
-      - main # or your default branch
+  pull_request_target:
+    types: [closed]
 
 jobs:
   build-and-push-docker-image:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.base_ref == 'master'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,9 +24,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: myusername/myrepo:${{ github.sha }}
+          tags: ${{ github.repository_owner }}/studyapp:${{ github.sha }}
